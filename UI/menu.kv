@@ -1,0 +1,130 @@
+<MenuWindow>:
+    orientation: "vertical"
+    spacing: 10
+
+    canvas.before:
+        # Color:
+            # rgba: 0,255,255,1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'resources/alb.jpg'
+            #source: 'corne.jpg'
+    BoxLayout:
+        size_hint_y: None
+        height: 100
+        Image:
+            source: 'resources/wifi.png'
+            size_hint_x: .4
+            size_hint_y: .5
+
+        TextInput:
+            text: 'URL'
+            id: url
+            height: 50
+            wight: 50
+            size_hint_y: .5
+            multiline: True
+            font_size: 28
+            size_hint_x: .7
+            color: [0, 0, 0, 1]
+            background_normal: ''
+            background_color: [173,216,230 ,1]
+        Label:
+            size_hint_x: 0.5
+
+    BoxLayout:
+        orientation: "horizontal"
+        BoxLayout:
+            size_hint_y: None
+            height: 250
+
+            FloatLayout:
+                Spinner:
+                    id: algorithm
+                    size_hint: None, None
+                    size: 200, 50
+                    pos_hint: {'center': (.5, .9)}
+                    text: 'Algorithm'
+                    background_color: [.70,1.30,1.80 ,1]
+                    values: 'X-Means', 'K-Means'
+
+
+        BoxLayout:
+            size_hint_y: None
+            height: 250
+            color: [0,0,0,0]
+            FloatLayout:
+                Spinner:
+                    id: initialisation
+                    size_hint: None, None
+                    size: 200, 50
+                    pos_hint: {'center': (.5, .9)}
+                    text: 'Initialisation'
+                    background_color: [.70,1.30,1.80 ,1]
+                    values: 'RANDOM', 'HEURISTIC'
+    BoxLayout:
+        size_hint_y: None
+        height: 150
+        color: [0,0,0,0.2]
+        orientation: 'vertical'
+        Label:
+            text: "TEXT"
+            color: [0,0,0,1]
+            background_color: [0,0,128,0.8]
+            size_hint_x: .40
+            font_size:28
+
+        CheckBox:
+            id: text_checkbox
+            size_hint_x: .10
+            text: "text"
+            active: True
+        Label:
+            text: "BROWSER"
+            color: [0,0,0,1]
+            background_color: [0,0,128,0.8]
+            size_hint_x: .50
+            font_size:28
+        CheckBox:
+            size_hint_x: .10
+            id: browser_checkbox
+            text: "browser"
+            active: True
+        Label:
+            text: "PHOTO"
+            color: [0,0,0,1]
+            background_color: [0,0,128,0.8]
+            size_hint_x: .60
+            font_size:28
+        CheckBox:
+            size_hint_x: .10
+            id: photo_checkbox
+            text: "photo"
+            active: True
+        Label:
+            text: "KEYWORDS EXTRACTION"
+            background_color: [0,0,128,0.8]
+            color: [0,0,0,1]
+            size_hint_x: .80
+            font_size:28
+        CheckBox:
+            size_hint_x: .10
+            id: keyword_checkbox
+            text: "keyword"
+            active: True
+
+    BoxLayout:
+        orientation: 'horizontal'
+
+        height:50
+        Label:
+            size_hint_x:.4
+        Button:
+            size_hint: .4, .4
+            text: 'Compute'
+            background_color:[.70,1.30,1.80 ,1]
+            on_release: root.show_pop_up()
+        Label:
+            size_hint_x:.4
+
