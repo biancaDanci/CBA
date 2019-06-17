@@ -20,11 +20,16 @@ class KMeansClustering:
         X_train_norm = min_max_scaler.fit_transform(np.array(self.features))
         X = np.array(X_train_norm)
         silhouette_list = []
+        #print("Elbow zice ca sunt" + self.select_with_elbow())
         initial_centroids = None
-        for n_clusters in range(2, 5):
-            if self.type_of_initialization == 'HEURISTIC':
+        for n_clusters in range(2, 3):
+            if 'HEURISTIC' in self.type_of_initialization:
                 initial_positions = []
-                Utils.get_centroids_text_denisity(n_clusters, self.features, initial_positions)
+                if 'CSS' in self.type_of_initialization:
+                    print("ii ok am prins heuristic css")
+                    Utils.get_centroids_font(n_clusters, self.features, initial_positions)
+                else:
+                    Utils.get_centroids_text_denisity(n_clusters, self.features, initial_positions)
                 initial_centroids = [X[index] for index in initial_positions]
                 clusterer = KMeans(n_clusters=n_clusters, init=np.array(initial_centroids), random_state=10)
             else:
@@ -36,9 +41,20 @@ class KMeansClustering:
                   "The average silhouette_score is :", silhouette_avg)
 
         number_of_clusters = silhouette_list.index(max(silhouette_list)) + 2
-        number_of_clusters = 4
+        number_of_clusters = 2
         print("The best number of clusters is {}".format(number_of_clusters))
+        # aici nu pot face asa initial centroids ca rama tot de 4 ca dim
+        #ATENTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
         self.compute_clustering(number_of_clusters, initial_centroids)
+
+    # def select_with_elbow(self):
+    #     from pyclustering.cluster.elbow import elbow
+    #     kmin, kmax = 1, 10
+    #     elbow_instance = elbow(self.features, kmin, kmax)
+    #     # process input data and obtain results of analysis
+    #     elbow_instance.process()
+    #     amount_clusters = elbow_instance.get_amount()
+    #     return amount_clusters
 
     def compute_clustering(self, num_clusters, initial_centroids=None):
         min_max_scaler = MinMaxScaler()
@@ -57,7 +73,7 @@ class KMeansClustering:
         with the following structure
         key: cluster_number
         value: list of blocks within the given cluster"""
-        
+
         for i in range(0, num_clusters):
             cluster_blocks = [block for (label, block) in zip(clusters_labels, self.blocks) if label == i]
             self.dict_clusters[i] = cluster_blocks

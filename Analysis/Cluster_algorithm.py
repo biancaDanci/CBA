@@ -1,4 +1,5 @@
 from KMeansClustering import KMeansClustering
+from XMeansClustering import XMeansClustering
 
 
 class Cluster:
@@ -17,7 +18,11 @@ class Cluster:
             print('Clusters'+str(cl_algorithm.dict_clusters.keys()))
             return cl_algorithm.dict_clusters
         else:
-            # de adaugat partea de Xmeans
+            cl_algorithm = XMeansClustering(self.type_of_initialization, features=self.features, blocks=self.blocks)
 
-            pass
+            cl_algorithm.computeXM()
+            print('Clusters'+str(cl_algorithm.dict_clusters.keys()))
+            return cl_algorithm.dict_clusters
+
+
 

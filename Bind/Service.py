@@ -1,7 +1,7 @@
 from Analysis.Cluster_algorithm import Cluster
 from Analysis.Validate import Validate
 from Analysis.Feature_for_block import FeatureBlockLevel
-
+from Analysis.Css_properties_block_lvl import CSSFeatureBlockLevel
 PATH = '/home/bia/PycharmProjects/CBA/Outputs/'
 
 
@@ -17,7 +17,8 @@ class Service:
     def cluster(self):
         print("Fac cluster")
         browser = 'browser' not in self.saving
-        featureblocklvl = FeatureBlockLevel(url=self.url)
+        # featureblocklvl = FeatureBlockLevel(url=self.url)
+        featureblocklvl = CSSFeatureBlockLevel(url=self.url)
         self.data_and_elems = featureblocklvl.fetchHtmlForThePage(headless=browser)
         features = self.data_and_elems['data']
         blocks = self.data_and_elems['blocks']
@@ -42,8 +43,6 @@ class Service:
         if 'text' in self.saving:
             self.show_results_text(clusters)
 
-
-
     def show_results_photo(self, clusters, blocks):
 
         print("am clusters", clusters)
@@ -67,7 +66,7 @@ class Service:
         print("done")
 
     def show_results_text(self, clusters):
-        path =(PATH + 'results.txt').encode('utf8')
+        path =(PATH + 'results_css.txt').encode('utf8')
         f = open(path, 'w+')
         for cluster_number, content in clusters.items():
             f.write("\n\n Cluster"+str(cluster_number) + '\n\n')

@@ -44,8 +44,8 @@ class MenuWindow(BoxLayout):
             #print(options[0])
             #print(options[1])
             #print(display)
-            options = ['K-Means', 'HEURISTIC']
-            display = ['']
+            options = ['X-Means', 'HEURISTIC CSS']
+            display = ['text']
             service = Service(url='http://www.cs.ubbcluj.ro/en/', algorithm=options[0], type_of_initialisation=options[1], saving=display)
             service.cluster()
 

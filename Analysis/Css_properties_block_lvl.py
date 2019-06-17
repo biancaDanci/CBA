@@ -51,25 +51,41 @@ class CSSFeatureBlockLevel:
         self.FONT_SIZE.append(font_size.split('px')[0])
         self.HEIGHT.append(height.split('px')[0])
 
-    def get_colors_snd_style(self, element):
-        self.FONT_STYLE.append(element.value_of_css_property('font-style'))
-        background_color = [float(x)/255.0 for x in element.value_of_css_property('background-color').split('(')[1].split(')')[0].split(',')]
-        #if len(background_color) == 4:
-         #   background_color = matplotlib.colors.to_rgb(background_color)
-        self.BACKGROUND_COLOR.append(float.hex(matplotlib.colors.to_hex(background_color)))
+    @staticmethod
+    def transform_to_hexa_rgba(rgba_list):
+        value = int('{:02x}{:02x}{:02x}{:02x}'.format(rgba_list[0],
+                                                      rgba_list[1],
+                                                      rgba_list[2],
+                                                      rgba_list[3]),
+                    16)
+        return value
 
-        text_color = [float(x)/255.0 for x in element.value_of_css_property('color').split('(')[1].split(')')[0].split(',')]
-        #if len(text_color) == 4:
-         #   text_color = matplotlib.colors.to_rgb(text_color)
-        try:
-            self.TEXT_COLOR.append(float.hex(matplotlib.colors.to_hex(text_color)))
-        except:
-            import pdb
-            pdb.set_trace()
-        border_color = [float(x)/255.0 for x in element.value_of_css_property('border-color').split('(')[1].split(')')[0].split(',')]
-       # if len(border_color) == 4:
-        #    border_color = matplotlib.colors.to_rgb(border_color)
-        self.BORDER_COLOR.append(float.hex(matplotlib.colors.to_hex(border_color)))
+    @staticmethod
+    def transform_to_hexa_rgb(rgb_list):
+        value = int('{0:02x}{1:02x}{2:02x}'.format(rgb_list[0],
+                                                   rgb_list[1],
+                                                   rgb_list[2]),
+                    16)
+        return value
+
+    def get_hex(self, list_colors):
+        if len(list_colors) == 4:
+            return CSSFeatureBlockLevel.transform_to_hexa_rgba(list_colors)
+        return CSSFeatureBlockLevel.transform_to_hexa_rgb(list_colors)
+
+    def get_colors_snd_style(self, element):
+        self.FONT_STYLE.append(['normal', 'italic', 'oblique', 'initial', 'inherit']
+                               .index(element.value_of_css_property('font-style')))
+        background_color = [int(x) for x in element.value_of_css_property('background-color').split('(')[1].split(')')[0].split(',')]
+        self.BACKGROUND_COLOR.append(self.get_hex(background_color))
+
+        text_color = [int(x) for x in element.value_of_css_property('color').split('(')[1].split(')')[0].split(',')]
+
+        self.TEXT_COLOR.append(self.get_hex(text_color))
+
+        border_color = [int(x) for x in element.value_of_css_property('border-color').split('(')[1].split(')')[0].split(',')]
+
+        self.BORDER_COLOR.append(self.get_hex(border_color))
 
     def find_blocks_simple_manner(self, node):
         elms = []
@@ -92,12 +108,13 @@ class CSSFeatureBlockLevel:
                       self.FONT_STYLE[position]))
         return entry
 
-    def fetchHtmlForThePage(self, delay=5, block_name='re-Searchresult'):
+    def fetchHtmlForThePage(self, delay=5, block_name='re-Searchresult', headless=True):
         # supply the local path of web driver.
         # in this example we use chrome driver
         url = self.url
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--headless')
+        if headless:
+            chrome_options.add_argument('--headless')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
         browser = webdriver.Chrome('/usr/bin/chromedriver', chrome_options=chrome_options)
@@ -128,7 +145,3 @@ class CSSFeatureBlockLevel:
                 'blocks': blocks,
                 'browser': browser}
 
-#feature = CSSFeatureBlockLevel("http://www.cs.ubbcluj.ro/en/")
-#data_and_elems = feature.fetchHtmlForThePage()
-#import pdb
-#pdb.set_trace()
