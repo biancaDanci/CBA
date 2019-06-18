@@ -1,14 +1,14 @@
 from selenium import webdriver
-import nltk
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
+import logging
 
-import matplotlib.colors
-class CSSFeatureBlockLevel:
 
-    NoWord = [',', '(', ')', ':', ';', '.', '%', '\x96', '{', '}', '[', ']', '!', '?', "''", "``"]
+class VisualFeatures:
+
+    """Class for visual feature extraction"""
 
     BLOCK_TAGS = ['p',
                   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -30,20 +30,23 @@ class CSSFeatureBlockLevel:
         self.FONT_SIZE = []
         self.HEIGHT = []
         self.WIDTH = []
-        # self.MARGIN = []
-        # color nu text-color
         self.FONT_STYLE = []
         self.BACKGROUND_COLOR = []
         self.TEXT_COLOR = []
         self.BORDER_COLOR = []
         self.BLOCKS = []
 
+    def __get_features(self, element):
+        """Method to extract features from a given element
+        :param element: a block level element
+        :type element: WebElement"""
+        self.__get_width_height_fontsize(element)
+        self.__get_colors_snd_style(element)
 
-    def get_features(self, element):
-        self.get_width_height_fontsize(element)
-        self.get_colors_snd_style(element)
-
-    def get_width_height_fontsize(self, element):
+    def __get_width_height_fontsize(self, element):
+        """Method for retrieving the width, the height and the font size of an element.
+        :param element: a block level element
+        :type element: WebElement"""
         height = element.value_of_css_property('height')
         width = element.value_of_css_property('width')
         font_size = element.value_of_css_property('font-size')
@@ -52,7 +55,10 @@ class CSSFeatureBlockLevel:
         self.HEIGHT.append(height.split('px')[0])
 
     @staticmethod
-    def transform_to_hexa_rgba(rgba_list):
+    def __transform_to_hexa_rgba(rgba_list):
+        """Method to transform an rgba array to hex value
+        :param rgba_list: list of rgba values
+        :type rgba_list: list"""
         value = int('{:02x}{:02x}{:02x}{:02x}'.format(rgba_list[0],
                                                       rgba_list[1],
                                                       rgba_list[2],
@@ -61,43 +67,61 @@ class CSSFeatureBlockLevel:
         return value
 
     @staticmethod
-    def transform_to_hexa_rgb(rgb_list):
+    def __transform_to_hexa_rgb(rgb_list):
+        """Method to transform an rgb array to hex value
+        :param rgb_list: list of rgb values
+        :type rgb_list: list"""
         value = int('{0:02x}{1:02x}{2:02x}'.format(rgb_list[0],
                                                    rgb_list[1],
                                                    rgb_list[2]),
                     16)
         return value
 
-    def get_hex(self, list_colors):
+    @staticmethod
+    def __get_hex(list_colors):
+        """Method to get the hex value from rgb or rgba array
+        :param list_colors: list of rgb or rgba values
+        :type list_colors: list"""
         if len(list_colors) == 4:
-            return CSSFeatureBlockLevel.transform_to_hexa_rgba(list_colors)
-        return CSSFeatureBlockLevel.transform_to_hexa_rgb(list_colors)
+            return VisualFeatures.__transform_to_hexa_rgba(list_colors)
+        return VisualFeatures.__transform_to_hexa_rgb(list_colors)
 
-    def get_colors_snd_style(self, element):
+    def __get_colors_snd_style(self, element):
+        """Method for retrieving colors and syle of a given element
+        :param element: a block level element
+        :type element: WebElement"""
         self.FONT_STYLE.append(['normal', 'italic', 'oblique', 'initial', 'inherit']
                                .index(element.value_of_css_property('font-style')))
         background_color = [int(x) for x in element.value_of_css_property('background-color').split('(')[1].split(')')[0].split(',')]
-        self.BACKGROUND_COLOR.append(self.get_hex(background_color))
+        self.BACKGROUND_COLOR.append(VisualFeatures.__get_hex(background_color))
 
         text_color = [int(x) for x in element.value_of_css_property('color').split('(')[1].split(')')[0].split(',')]
 
-        self.TEXT_COLOR.append(self.get_hex(text_color))
+        self.TEXT_COLOR.append(VisualFeatures.__get_hex(text_color))
 
         border_color = [int(x) for x in element.value_of_css_property('border-color').split('(')[1].split(')')[0].split(',')]
 
-        self.BORDER_COLOR.append(self.get_hex(border_color))
+        self.BORDER_COLOR.append(VisualFeatures.__get_hex(border_color))
 
-    def find_blocks_simple_manner(self, node):
+    def __find_blocks_simple_manner(self, node):
+        """Method used to find all elements in a manner or the other
+        :param node: the starting node
+        :type node: WebElement"""
         elms = []
+
         for tag in self.BLOCK_TAGS:
             elements = node.find_elements_by_tag_name(tag)
             for element in elements:
                 if element.is_displayed() and len(element.text) >= 2:
                     elms.append(element)
-                    self.get_features(element)
+                    self.__get_features(element)
+
         return elms
 
-    def create_entry(self, position):
+    def __create_entry(self, position):
+        """Method to create an entry in the final array of features
+        :param position: the position of the element
+        :type position: int"""
         entry = []
         entry.extend((self.FONT_SIZE[position],
                       self.HEIGHT[position],
@@ -109,39 +133,32 @@ class CSSFeatureBlockLevel:
         return entry
 
     def fetchHtmlForThePage(self, delay=5, block_name='re-Searchresult', headless=True):
-        # supply the local path of web driver.
-        # in this example we use chrome driver
+        """Method used to get all features from the web page."""
         url = self.url
         chrome_options = webdriver.ChromeOptions()
         if headless:
+            logging.info("Running in headless mode")
             chrome_options.add_argument('--headless')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
         browser = webdriver.Chrome('/usr/bin/chromedriver', chrome_options=chrome_options)
         # browser = webdriver.Chrome('/usr/bin/chromedriver')
-        # open the browser with the URL
-        # a browser windows will appear for a little while
+
         browser.get(url)
         try:
-            # check for presence of the element you're looking for
             element_present = EC.presence_of_element_located((By.ID, block_name))
             WebDriverWait(browser, delay).until(element_present)
 
-        # unless found, catch the exception
         except TimeoutException:
-            print
-            "Loading took too much time!"
+            logging.error("Loading took too much time!")
         root_element = browser.find_elements_by_tag_name("*")[0]
 
-        blocks = self.find_blocks_simple_manner(root_element)
+        blocks = self.__find_blocks_simple_manner(root_element)
 
         data = []
         for i in range(0, len(blocks)):
-            data.append(self.create_entry(i))
+            data.append(self.__create_entry(i))
 
-
-        # return html
         return {'data': data,
                 'blocks': blocks,
                 'browser': browser}
-
