@@ -8,10 +8,11 @@ import logging
 
 class KMeansClustering:
 
-    def __init__(self, type_of_initialisation, features, blocks):
+    def __init__(self, type_of_initialisation, features, blocks, fixed):
         self.type_of_initialization = type_of_initialisation
         self.features = features
         self.blocks = blocks
+        self.fixed = fixed
         self.dict_clusters = {}
 
     def __get_cluster_heuristic(self, n_clusters, X, list_of_initial_centroids):
@@ -32,6 +33,15 @@ class KMeansClustering:
         clusterer = KMeans(n_clusters=n_clusters, init=np.array(initial_centroids), random_state=10)
         return clusterer
 
+    def __compute_for_fixed_clusters(self, X, list_of_initial_centroids):
+        logging.info("Starting with fix number of clusters")
+        if 'RANDOM' not in self.type_of_initialization:
+            self.__get_cluster_heuristic(self.fixed, X, list_of_initial_centroids)
+            self.__compute_clustering(self.fixed, list_of_initial_centroids[0])
+        else:
+            logging.info("Random initialisation")
+            self.__compute_clustering(self.fixed)
+
     def __find_best_clustering(self):
 
         """ Method to find the best number of clusters in a range from 2 to 6"""
@@ -43,26 +53,29 @@ class KMeansClustering:
         silhouette_list = []
         initial_centroids = None
         list_of_initial_centroids = []
-        for n_clusters in range(2, 6):
-            if 'RANDOM' not in self.type_of_initialization:
-                clusterer = self.__get_cluster_heuristic(n_clusters, X, list_of_initial_centroids)
-            else:
-                logging.info("Random initialisation")
-                clusterer = KMeans(n_clusters=n_clusters, random_state=10)
+        if self.fixed:
+            self.__compute_for_fixed_clusters(X, list_of_initial_centroids)
+        else:
+            for n_clusters in range(2, 6):
+                if 'RANDOM' not in self.type_of_initialization:
+                    clusterer = self.__get_cluster_heuristic(n_clusters, X, list_of_initial_centroids)
+                else:
+                    logging.info("Random initialisation")
+                    clusterer = KMeans(n_clusters=n_clusters, random_state=10)
 
-            cluster_labels = clusterer.fit_predict(X)
-            silhouette_avg = silhouette_score(X, cluster_labels)
-            silhouette_list.append(silhouette_avg)
-            logging.info("For {}".format(n_clusters) +
+                cluster_labels = clusterer.fit_predict(X)
+                silhouette_avg = silhouette_score(X, cluster_labels)
+                silhouette_list.append(silhouette_avg)
+                logging.info("For {}".format(n_clusters) +
                          " clusters, the average silhouette_score is : {}".format(silhouette_avg))
 
-        number_of_clusters = silhouette_list.index(max(silhouette_list)) + 2
+            number_of_clusters = silhouette_list.index(max(silhouette_list)) + 2
 
-        if initial_centroids:
-            initial_centroids = list_of_initial_centroids[number_of_clusters-2]
+            if initial_centroids:
+                initial_centroids = list_of_initial_centroids[number_of_clusters-2]
 
-        logging.info("The best number of clusters is {}".format(number_of_clusters))
-        self.__compute_clustering(number_of_clusters, initial_centroids)
+            logging.info("The best number of clusters is {}".format(number_of_clusters))
+            self.__compute_clustering(number_of_clusters, initial_centroids)
 
     def __compute_clustering(self, num_clusters, initial_centroids=None):
         """ Method to compute clustering after the best number of clusters had been found

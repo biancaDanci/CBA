@@ -1,11 +1,12 @@
 from VisualFeatures import VisualFeatures
 from TextFeatures import TextFeatures
-
+import logging
 
 class FeatureExtractor:
     """Method to initialize an extractor"""
 
     def __init__(self, url, type_of_initialization, headless):
+        logging.info("Stating for {}".format(type_of_initialization))
         self.url = url
         self.type_of_initialization = type_of_initialization
         self.headless = headless

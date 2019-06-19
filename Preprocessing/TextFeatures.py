@@ -47,6 +47,7 @@ class TextFeatures:
 
     def __calculate_qutient(self):
         """Method to calculate the quotient for features that demand it."""
+        logging.info("I hae calculated the quotient")
         self.QOTIENT_N_OF_WORDS.append(0)
         self.QOTIENT_S_LENGTH.append(0)
         self.QOTIENT_T_DENSITY.append(0)
@@ -157,13 +158,24 @@ class TextFeatures:
             WebDriverWait(browser, delay).until(element_present)
 
         except TimeoutException:
+
             logging.error("Loading took to much time")
+        try:
+            root_element = browser.find_elements_by_tag_name("*")[0]
+            print(root_element)
 
-        root_element = browser.find_elements_by_tag_name("*")[0]
-
-        blocks = self.__find_blocks_simple_manner(root_element)
-        self.__calculate_qutient()
-
+            blocks = self.__find_blocks_simple_manner(root_element)
+            print("Done computing elems")
+            self.__calculate_qutient()
+        except:
+            print(len(self.NUMBER_OF_WORDS),
+            len(self.QOTIENT_N_OF_WORDS),
+            len(self.SENTENCE_LENGTH),
+            len(self.QOTIENT_S_LENGTH),
+            len(self.TEXT_DENSITY),
+            len(self.QOTIENT_T_DENSITY),
+            len(self.LINK_DENSITY),
+            len(self.BLOCKS))
         data = []
         for i in range(0, len(blocks)):
             data.append(self.__create_entry(i))

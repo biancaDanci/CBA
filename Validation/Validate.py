@@ -41,8 +41,12 @@ class Validate:
             print(ci_blocks)
             print(len(blocks_text))
 
-            precision = float(ci_blocks)/len(blocks_text)
-            recall = float(ci_blocks)/len(correct_content)
+            try:
+                precision = float(ci_blocks)/len(blocks_text)
+                recall = float(ci_blocks) / len(correct_content)
+            except:
+                print("A date eroare la ci_blocks {}, len {}, corect {}".format(ci_blocks, len(blocks_text), len(correct_content)))
+                print(correct_content)
 
             results.append((precision, recall, cluster_number))
         self.__get_most_likely_cluster(results)

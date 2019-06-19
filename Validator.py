@@ -24,3 +24,12 @@ class Validator:
         if len(display) <= 0:
             raise Exception("You must select the type of initialisation")
 
+    @staticmethod
+    def validate_heuristic(initialization, heuristic):
+        if initialization != 'RANDOM' and heuristic == 'Choose heuristics':
+            raise Exception("Heuristic mode was requested but an heuristic was not provided")
+
+    @staticmethod
+    def validate_features(features):
+        if features == 'Type of features':
+            raise Exception("Type of features not specified ")

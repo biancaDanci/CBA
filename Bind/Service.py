@@ -2,120 +2,66 @@ from Analysis.Cluster_algorithm import Clustering
 from Validation.Validate import Validate
 from Preprocessing.FeatureExtractor import FeatureExtractor
 from Tools.Statistics import Statistics
-PATH = '/home/bia/PycharmProjects/CBA/Outputs/'
+from Tools.Display import Display
+from Tools.KeywordsExtractor import KeywordsExtractor
+import logging
 
 
 class Service:
-    def __init__(self, url, algorithm, type_of_initialisation, saving):
+    def __init__(self, url, algorithm, type_of_initialisation, saving, features_type, results_to_show, fixed_number_clusters):
         self.url = url
         self.algorithm = algorithm
-        self.type_of_initialisation = type_of_initialisation
+        self.type_of_initialisation = type_of_initialisation  # RANDOM, HEURISTIC
+        self.features_type = features_type  # TEXT, VISUAL
         self.saving = saving
+        self.results_to_show = results_to_show  # INTERMEDIATE, FINAL
         self.data_and_elems = None
         self.precision_recall = None
         self.resulting_cluster = None
+        self.fixed_number_clusters = fixed_number_clusters
 
-    def show_featues(self):
+    def show_featues(self, clusters):
         features = self.data_and_elems['data']
-
-        s = Statistics('', features)
-        s.show_all_features('VISUAL')
-
-
-
+        s = Statistics(clusters, features)
+        s.show_statistics(self.features_type, self.data_and_elems['blocks'])
 
     def cluster(self):
-        print("Starting computing")
+        logging.info("Starting computing")
         browser = 'browser' not in self.saving
-
-        #featureblocklvl = TextFeatures(url=self.url)
-        #featureblocklvl = VisualFeatures(url=self.url)
-        extractor = FeatureExtractor(self.url, 'VISUAL', headless=browser)
+        extractor = FeatureExtractor(self.url, self.features_type, headless=browser)
         self.data_and_elems = extractor.extract_features()
-        # self.data_and_elems = featureblocklvl.fetchHtmlForThePage(headless=browser)
-        print("All features have been retrieved")
+        logging.info("All features have been retrieved")
+
         features = self.data_and_elems['data']
         blocks = self.data_and_elems['blocks']
 
         clusterer = Clustering(algorithm=self.algorithm,
                                type_of_initialization=self.type_of_initialisation,
                                features=features,
-                               blocks=blocks)
+                               blocks=blocks,
+                               fixed=self.fixed_number_clusters)
         clusters = clusterer.compute()
         self.show_results(clusters, blocks)
 
-    def validate(self, clusters, blocks):
-        pass
+    @staticmethod
+    def keywords_extraction():
+        file_before = open("/home/bia/PycharmProjects/CBA/Outputs/Intermediary Results/results.txt", "r")
+        text_before = file_before.read()
+        file_after = open("/home/bia/PycharmProjects/CBA/Outputs/Final Results/final_results.txt", "r")
+        text_after = file_after.read()
+
+        print(KeywordsExtractor(text_before, text_after).compute())
 
     def show_results(self, clusters, blocks):
+        logging.info("Check results")
         validate = Validate(url=self.url, clusters=clusters)
         validate.validate_jusText()
         self.precision_recall = validate.results
         self.resulting_cluster = validate.resulting_cluster
-        self.show_final_results_as_text(clusters)
-        self.show_featues()
-        if 'photo' in self.saving:
-            self.show_results_photo(clusters, blocks)
-        if 'text' in self.saving:
-            self.show_results_text(clusters)
 
-    def show_final_results_as_text(self, clusters):
-        path = (PATH + 'final_results.txt').encode('utf8')
-        f = open(path, 'w+')
-        for cluster_number, content in clusters.items():
-            if cluster_number == self.resulting_cluster:
-                f.write("\n\n Cluster " + str(cluster_number) + '\n\n')
-                blocks_text = list(dict.fromkeys([block.text for block in content]))
-                blocks_text = self.elimnate_duplicates(blocks_text)
-                for block in blocks_text:
-                    f.write(block.encode('utf8') + '\n')
-        f.close()
+        self.show_featues(clusters)
+        d = Display(self.saving, clusters, self.resulting_cluster, blocks, ['FINAL', 'INTERMEDIARY'],
+                    self.data_and_elems['browser'])
+        d.show()
 
-    def elimnate_duplicates(self, blocks_text):
-        try:
-            for elem in blocks_text:
-                gasit = False
-                for i in range(blocks_text.index(elem) + 1, len(blocks_text)):
-                    if elem in blocks_text[i] and not gasit:
-                        blocks_text.remove(elem)
-                        gasit = True
-                        i = len(blocks_text)
-        except:
-            pass
-        return blocks_text
-    def show_results_photo(self, clusters, blocks):
-
-        print("am clusters", clusters)
-        browser = self.data_and_elems['browser']
-        browser.set_window_size(2200, 1800)
-        path = PATH + 'blhhhha' + '.png'
-        browser.save_screenshot(path)
-
-        for cluster_number, content in clusters.items():
-            for block in blocks:
-                browser.execute_script("arguments[0].setAttribute('style', 'background-color:red;');", block)
-            print(" \n \n \n cluster {}".format(cluster_number))
-            for block in content:
-                print(block.text)
-                browser.execute_script("arguments[0].setAttribute('style', 'background-color:green;');", block)
-
-            path = PATH + 'blhhha_' + str(cluster_number) + '.png'
-            print(path)
-            browser.save_screenshot(path)
-
-        print("done")
-
-    def show_results_text(self, clusters):
-        path =(PATH + 'results_css.txt').encode('utf8')
-        f = open(path, 'w+')
-        for cluster_number, content in clusters.items():
-            f.write("\n\n Cluster"+str(cluster_number) + '\n\n')
-            blocks_text = list(dict.fromkeys([block.text for block in content]))
-            for block in blocks_text:
-                f.write(block.encode('utf8')+'\n')
-        f.close()
-
-        #self.data_and_elems['browser'].quit()
-
-
-
+        Service.keywords_extraction()
