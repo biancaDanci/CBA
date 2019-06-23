@@ -15,7 +15,7 @@ class Validate:
 
     def validate_jusText(self):
         """Method to validate the results against jusText"""
-        correct_content = self.__get_result_justText()
+        correct_content = self.get_result_justText()
         results = []
         for cluster_number, blocks in self.clusters.items():
 
@@ -70,7 +70,7 @@ class Validate:
     def order_recall(obj):
         return obj[1]
 
-    def __get_result_justText(self):
+    def get_result_justText(self):
         """Method used to retrieve the actual content using jusText"""
         important_content = []
         response = requests.get(self.url)

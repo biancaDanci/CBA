@@ -6,7 +6,7 @@ from kivy.uix.boxlayout import BoxLayout
 from Validator import Validator
 from Bind.Service import Service
 import logging
-import time
+
 
 class MenuWindow(BoxLayout):
 
@@ -65,8 +65,8 @@ class MenuWindow(BoxLayout):
             #options = ['K-Means', 'TEXT DENSITY']
             #display = ['TEXT', 'PHOTO']
             #https://www.bbc.com/news/world-europe-48600233
-
-            service = Service(url='http://www.cs.ubbcluj.ro/en/',
+            # 'http://www.cs.ubbcluj.ro/en/'
+            service = Service(url=url.text,
                               #'https://www.boldsky.com/health/wellness/2019/yoga-poses-to-lose-weight-128727.html?ref=60sec',
                               algorithm=options[0],
                               type_of_initialisation=options[1],
@@ -80,9 +80,10 @@ class MenuWindow(BoxLayout):
             self.ids.precision_recall.text = " Precision: " + str(precision_recall[0]) + \
                                              "\n Recall: " + str(precision_recall[1])
             service.data_and_elems['browser'].quit()
+            #f = open(path, 'a')
+            #f.write("Precision: {}; Recall: {} \n".format(precision_recall[0], precision_recall[1]))
             logging.info("The computing has finished.")
-
-            time.sleep(20)
+            #f.close()
             popup = Popup(title='Success',
                           content=Label(text='The computing has finished. You can now see your \n'
                                              '  results or start analysing a different url. \n'
@@ -109,4 +110,3 @@ class MenuApp(App):
         return MenuWindow()
 
 
-MenuApp().run()

@@ -9,7 +9,7 @@
             pos: self.pos
             size: self.size
             source: 'resources/alb.jpg'
-            #source: 'corne.jpg'
+            #source: 'resources/blue3.jpg'
     BoxLayout:
         size_hint_y: None
         height: 100
@@ -48,6 +48,8 @@
                     text: 'Algorithm'
                     background_color: [.70,1.30,1.80 ,1]
                     values: 'X-Means', 'K-Means'
+                    on_text: nr_clusters.disabled = True if algorithm.text == 'X-Means' else False
+
 
 
         BoxLayout:
@@ -63,7 +65,64 @@
                     text: 'Initialisation'
                     background_color: [.70,1.30,1.80 ,1]
                     values: 'RANDOM', 'HEURISTIC'
+                    on_text: heuristic.disabled = True if initialisation.text == 'RANDOM' else False
+
+
+        BoxLayout:
+            size_hint_y: None
+            height: 250
+            color: [0,0,0,0]
+            FloatLayout:
+                Spinner:
+                    id: nr_clusters
+                    size_hint: None, None
+                    size: 200, 50
+                    pos_hint: {'center': (.5, .9)}
+                    text: 'Number of clusters - Optional'
+                    background_color: [.70,1.30,1.80 ,1]
+                    values: '2','3','4','5','6','7', 'The algorithm will find it'
+
+
+        BoxLayout:
+            size_hint_y: None
+            height: 250
+            color: [0,0,0,0]
+            FloatLayout:
+                Spinner:
+                    id: features
+                    size_hint: None, None
+                    size: 200, 50
+                    pos_hint: {'center': (.5, .9)}
+                    text: 'Type of features'
+                    background_color: [.70,1.30,1.80 ,1]
+                    values: 'TEXT', 'VISUAL'
+
+
+        BoxLayout:
+            size_hint_y: None
+            height: 250
+            color: [0,0,0,0]
+            FloatLayout:
+                Spinner:
+                    id: heuristic
+                    size_hint: None, None
+                    size: 200, 50
+                    pos_hint: {'center': (.5, .9)}
+                    text: 'Choose heuristics'
+                    background_color: [.70,1.30,1.80 ,1]
+                    values: ['TEXT DENSITY', 'SENTENCE LENGTH'] if features.text == 'TEXT' else ['FONT SIZE','DIMENSION']
+
     BoxLayout:
+
+        canvas.before:
+        # Color:
+            # rgba: 0,255,255,1
+            Rectangle:
+                pos: self.pos
+                size: 150, 150
+                source: 'resources/display.png'
+                #source: 'resources/blue3.jpg'
+
         size_hint_y: None
         height: 150
         color: [0,0,0,0.2]
@@ -73,21 +132,21 @@
             color: [0,0,0,1]
             background_color: [0,0,128,0.8]
             size_hint_x: .40
-            font_size:28
-
+            font_size:20
         CheckBox:
             id: text_checkbox
-            size_hint_x: .10
-            text: "text"
+            size_hint_x: .20
+            text: "TEXT"
             active: True
         Label:
             text: "BROWSER"
             color: [0,0,0,1]
             background_color: [0,0,128,0.8]
-            size_hint_x: .50
-            font_size:28
+            size_hint_x: .40
+            font_size:20
+
         CheckBox:
-            size_hint_x: .10
+            size_hint_x: .20
             id: browser_checkbox
             text: "browser"
             active: True
@@ -95,24 +154,25 @@
             text: "PHOTO"
             color: [0,0,0,1]
             background_color: [0,0,128,0.8]
-            size_hint_x: .60
-            font_size:28
+            size_hint_x: .40
+            font_size:20
         CheckBox:
-            size_hint_x: .10
+            size_hint_x: .20
             id: photo_checkbox
-            text: "photo"
+            text: "PHOTO"
             active: True
         Label:
             text: "KEYWORDS EXTRACTION"
             background_color: [0,0,128,0.8]
             color: [0,0,0,1]
-            size_hint_x: .80
-            font_size:28
+            size_hint_x: .40
+            font_size:20
         CheckBox:
-            size_hint_x: .10
+            size_hint_x: .20
             id: keyword_checkbox
             text: "keyword"
             active: True
+
 
     BoxLayout:
         orientation: 'horizontal'
@@ -122,9 +182,15 @@
             size_hint_x:.4
         Button:
             size_hint: .4, .4
-            text: 'Compute'
+            text: 'Start analysis'
             background_color:[.70,1.30,1.80 ,1]
             on_release: root.show_pop_up()
         Label:
+            id: precision_recall
             size_hint_x:.4
+            text: ''
+            visible: False
+            background_color: [0,0,128,0.8]
+            color: [0,0,0,1]
+            font_size:28
 

@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score, davies_bouldin_score
-from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler, StandardScaler
 from Tools.Utils import Utils
 import logging
 
@@ -61,7 +61,7 @@ class KMeansClustering:
                     clusterer = self.__get_cluster_heuristic(n_clusters, X, list_of_initial_centroids)
                 else:
                     logging.info("Random initialisation")
-                    clusterer = KMeans(n_clusters=n_clusters, random_state=10)
+                    clusterer = KMeans(n_clusters=n_clusters, random_state=10, n_init=10)
 
                 cluster_labels = clusterer.fit_predict(X)
                 silhouette_avg = silhouette_score(X, cluster_labels)

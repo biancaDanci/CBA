@@ -139,6 +139,7 @@ class VisualFeatures:
         if headless:
             logging.info("Running in headless mode")
             chrome_options.add_argument('--headless')
+            chrome_options.add_experimental_option("detach", True)
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
         browser = webdriver.Chrome('/usr/bin/chromedriver', chrome_options=chrome_options)

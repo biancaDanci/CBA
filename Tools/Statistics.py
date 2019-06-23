@@ -25,14 +25,19 @@ class Statistics:
         :type feature_name: string
         :param feature_number: the position of the feature in the feature array
         :type feature_number: int"""
-        y = np.array([feature[feature_number] for feature in self.features])
-        sns.set()
-        plt.title(feature_name)
-        plt.xlabel('Position')
-        plt.ylabel('Value')
-        plt.plot(y[:], 'bo', y, 'k')
-        path = PATH + feature_name+'.jpg'
-        plt.savefig(path)
+        if feature_name=="Text_density":
+            from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler, StandardScaler
+            min_max_scaler = MinMaxScaler()
+            X_train_norm = min_max_scaler.fit_transform(self.features)
+            X = np.array(X_train_norm)
+            y = np.array([feature[feature_number] for feature in X])
+            sns.set()
+            plt.title(feature_name)
+            plt.xlabel('Position')
+            plt.ylabel('Value')
+            plt.plot(y[:], 'bo', y, 'k')
+            path = PATH + feature_name+'.jpg'
+            plt.savefig(path)
 
     def __show_all_features_individually(self, features_type):
         """Method to display in a statistical manner

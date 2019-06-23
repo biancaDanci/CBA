@@ -45,7 +45,7 @@ class Display:
 
     def show_results_as_text(self, path, final):
 
-        open('path', 'w').close()
+        open(path, 'w').close()
         if final:
             content = self.clusters[self.resulting_cluster]
             self.show_text(path, self.resulting_cluster, content)

@@ -99,6 +99,19 @@ class TextFeatures:
         element_word_count = self.__get_number_of_words(element.text)
         self.LINK_DENSITY.append(float(link_words) / float(element_word_count))
 
+    def __select_element(self, element):
+
+        text = element.text
+        aux = []
+        for elem in element.find_elements_by_tag_name('*'):
+            aux.append(elem.text)
+        for aux_tex in aux:
+            if aux_tex in text:
+                text.replace(aux_tex, '')
+        if text and not text.isspace():
+            return True
+        return False
+
     def __find_blocks_simple_manner(self, node):
         """Method used to find all elements in a manner or the other
         :param node: the starting node
@@ -109,7 +122,7 @@ class TextFeatures:
         #     for elem in node.find_elements_by_tag_name("*"):
         #         if elem.tag_name in self.BLOCK_TAGS and elem.is_displayed() and len(elem.text) > 2:
         #             elms.append(elem)
-        #             self.get_features(elem)
+        #             self.__get_features(elem)
         #     print("am terminat ismple manner")
         # except:
         #     import pdb
@@ -118,7 +131,8 @@ class TextFeatures:
         for tag in self.BLOCK_TAGS:
             elements = node.find_elements_by_tag_name(tag)
             for element in elements:
-                if element.is_displayed() and len(element.text) >= 2:
+                if element.is_displayed() and len(element.text) >= 2: # and self.__select_element(element):
+                    #self.__select_element(element)
                     elms.append(element)
                     self.__get_features(element)
         return elms
@@ -145,6 +159,7 @@ class TextFeatures:
         if headless:
             logging.info("Stating in headless mode")
             chrome_options.add_argument('--headless')
+            chrome_options.add_experimental_option("detach", True)
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
         browser = webdriver.Chrome('/usr/bin/chromedriver', chrome_options=chrome_options)
